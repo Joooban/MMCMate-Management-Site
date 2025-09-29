@@ -99,9 +99,10 @@ document.getElementById('confirmSubmitBtn').addEventListener('click', async func
         });
         if (recentEntries.length > 5) recentEntries = recentEntries.slice(0, 5);
 
-        updateRecentEntries();
         clearFormSilently();
-        showAlert('Entry saved successfully!', 'success');
+
+        const successModal = new bootstrap.Modal(document.getElementById('submitSuccessModal'));
+        successModal.show();
 
     } catch (err) {
         console.error('Save error:', err);
@@ -158,27 +159,6 @@ function showAlert(message, type) {
             formAlert.style.display = 'none';
         }, 5000);
     }
-}
-
-// Update recent entries
-function updateRecentEntries() {
-    const container = document.getElementById('recentEntries');
-    
-    if (recentEntries.length === 0) {
-        container.innerHTML = '<p style="color: var(--gray); font-size: 14px;">No recent entries to display.</p>';
-        return;
-    }
-    
-    container.innerHTML = recentEntries.map(entry => `
-        <div class="entry-item">
-            <div class="entry-title">${entry.type}</div>
-            <div class="entry-meta">
-                Category: ${entry.category} | 
-                Added: ${new Date(entry.timestamp).toLocaleString()} |
-                ${entry.page ? `Page: ${entry.page}` : 'No reference page'}
-            </div>
-        </div>
-    `).join('');
 }
 
 // Character counter
