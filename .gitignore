@@ -1,3 +1,5 @@
 # Ignore the .env file 
 .env
 .devcontainer
+
+/node_modules/

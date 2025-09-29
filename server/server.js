@@ -1,68 +1,57 @@
+// server.js
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const db = require('./db'); // PostgreSQL connection
+const { Pool } = require('pg');
 
-const app = express();
-const port = process.env.PORT || 3000;
-
-// Start the server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${port}`);
+// --- Database connection ---
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false } // needed for Supabase
 });
+
+// Optional: log successful connections
+pool.on('connect', () => {
+    console.log('✅ Database connection established');
+});
+
+pool.on('error', (err) => {
+    console.error('❌ Database connection error', err);
+});
+
+// --- Express setup ---
+const app = express();
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, '../public'))); // serve CSS/JS correctly
 
+// Serve index.html
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public', 'landing_page.html'));
+    res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-// Automated add row to databasebot
+// --- API endpoint ---
 app.post("/addDatabaseBot", async (req, res) => {
     const { ID, Type, Category, Description, Sanctions, Page } = req.body;
 
     try {
-        // Call the Postgres function
-        const result = await db.query(
-            'SELECT * FROM public.add_databasebot_row($1, $2, $3, $4, $5, $6)',
+        await pool.query(
+            'SELECT public.add_databasebot_row($1, $2, $3, $4, $5, $6)',
             [ID, Type, Category, Description, Sanctions, Page]
         );
 
-        const newRowId = result.rows[0].new_row_id;
-
-        res.json({
-            message: "Row added successfully!",
-            rowId: newRowId
-        });
+        res.json({ message: "Row added successfully!" });
     } catch (err) {
         console.error('Database error:', err);
-        res.status(500).json({ error: err.message || "Database error" });
+        res.status(500).json({ error: 'Database error' });
     }
 });
 
-
-/**WITHOUT FUNCTION AVAILABLE
-
-app.post('/api/databasebot', async (req, res) => {
-    const { ID, Type, Category, Description, Sanctions, Page } = req.body;
-    try {
-        await db.query(
-            'INSERT INTO public.databasebot ("ID", "Type", "Category", "Description", "Sanctions", "Page") VALUES ($1, $2, $3, $4, $5, $6)',
-            [ID, Type, Category, Description, Sanctions, Page]
-        );
-        res.status(201).json({ message: 'Row added successfully' });
-    } catch (err) {
-        console.error('Database insert error:', err);
-        res.status(500).json({ error: 'Internal server error' });
-    }
+// --- Start server ---
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log('Connecting to:', process.env.DATABASE_URL);
 });
-
-app.listen(port, () => {
-    console.log(`Server running on port ${port} ✅`);
-});
-
-
- */

@@ -73,15 +73,12 @@ document.getElementById('entryForm').addEventListener('submit', async function (
         // Send data to backend
         const response = await fetch('/addDatabaseBot', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData)
         });
 
-        const result = await response.json();
-
         if (!response.ok) {
+            const result = await response.json();
             throw new Error(result.error || 'Failed to add entry');
         }
 
@@ -90,9 +87,7 @@ document.getElementById('entryForm').addEventListener('submit', async function (
             ...formData,
             timestamp: new Date().toISOString()
         });
-        if (recentEntries.length > 5) {
-            recentEntries = recentEntries.slice(0, 5);
-        }
+        if (recentEntries.length > 5) recentEntries = recentEntries.slice(0, 5);
 
         updateRecentEntries();
         clearForm();
@@ -105,6 +100,7 @@ document.getElementById('entryForm').addEventListener('submit', async function (
         saveBtn.disabled = false;
         spinner.style.display = 'none';
     }
+
 });
 
 
@@ -113,7 +109,7 @@ function clearForm() {
     if (document.getElementById('entryTitle').value || 
         document.getElementById('description').value || 
         document.getElementById('referencePage').value) {
-        if (!confirm('Are you sure you want to clear all form data?')) {
+        if (!confirm('Do you wish to submit?')) {
             return;
         }
     }
