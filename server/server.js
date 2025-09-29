@@ -7,6 +7,11 @@ const db = require('./db'); // PostgreSQL connection
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Start the server
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${port}`);
+});
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
