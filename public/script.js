@@ -45,17 +45,29 @@ function logout() {
 document.getElementById('entryForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
+    // Show Bootstrap modal instead of confirm()
+    const modal = new bootstrap.Modal(document.getElementById('submitConfirmModal'));
+    modal.show();
+});
+
+// Handle the confirm button click in the modal
+document.getElementById('confirmSubmitBtn').addEventListener('click', async function() {
+    // Hide the modal first
+    const modal = bootstrap.Modal.getInstance(document.getElementById('submitConfirmModal'));
+    modal.hide();
+    
+    // Now execute your existing form submission logic
     const saveBtn = document.getElementById('saveBtn');
     const spinner = document.getElementById('loadingSpinner');
     const formAlert = document.getElementById('formAlert');
 
     // Collect form data
     const formData = {
-        ID: Date.now().toString(), // or generate your own unique ID
+        ID: Date.now().toString(),
         Type: document.getElementById('entryTitle').value.trim(),
         Category: document.getElementById('category').value,
         Description: document.getElementById('description').value.trim(),
-        Sanctions: null, // add this if you have a field later
+        Sanctions: null,
         Page: document.getElementById('referencePage').value.trim() || null
     };
 
@@ -70,7 +82,6 @@ document.getElementById('entryForm').addEventListener('submit', async function (
     formAlert.style.display = 'none';
 
     try {
-        // Send data to backend
         const response = await fetch('/addDatabaseBot', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -82,7 +93,6 @@ document.getElementById('entryForm').addEventListener('submit', async function (
             throw new Error(result.error || 'Failed to add entry');
         }
 
-        // Add to local recentEntries
         recentEntries.unshift({
             ...formData,
             timestamp: new Date().toISOString()
@@ -90,7 +100,7 @@ document.getElementById('entryForm').addEventListener('submit', async function (
         if (recentEntries.length > 5) recentEntries = recentEntries.slice(0, 5);
 
         updateRecentEntries();
-        clearForm();
+        clearFormSilently();
         showAlert('Entry saved successfully!', 'success');
 
     } catch (err) {
@@ -100,20 +110,36 @@ document.getElementById('entryForm').addEventListener('submit', async function (
         saveBtn.disabled = false;
         spinner.style.display = 'none';
     }
-
 });
 
-
-// Clear form
+// Clear form with confirmation
 function clearForm() {
     if (document.getElementById('entryTitle').value || 
         document.getElementById('description').value || 
         document.getElementById('referencePage').value) {
-        if (!confirm('Do you wish to submit?')) {
-            return;
-        }
+        
+        // Show Bootstrap modal instead of confirm()
+        const modal = new bootstrap.Modal(document.getElementById('clearFormModal'));
+        modal.show();
+        return;
     }
     
+    // If form is empty, clear silently
+    clearFormSilently();
+}
+
+// Handle the confirm clear button click in the modal
+document.getElementById('confirmClearBtn').addEventListener('click', function() {
+    // Hide the modal first
+    const modal = bootstrap.Modal.getInstance(document.getElementById('clearFormModal'));
+    modal.hide();
+    
+    // Clear the form
+    clearFormSilently();
+});
+
+// Clear form without any confirmation (for after successful saves)
+function clearFormSilently() {
     document.getElementById('entryForm').reset();
     document.getElementById('charCounter').textContent = '0 / 2000 characters';
     document.getElementById('charCounter').classList.remove('warning');
