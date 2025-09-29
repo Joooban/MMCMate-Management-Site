@@ -9,6 +9,7 @@ let currentUser = null;
 
 // Login functionality
 document.getElementById('loginForm').addEventListener('submit', function(e) {
+    console.log("Login form submitted");
     e.preventDefault();
     
     const username = document.getElementById('username').value;
@@ -41,50 +42,71 @@ function logout() {
 }
 
 // Entry form submission
-document.getElementById('entryForm').addEventListener('submit', function(e) {
+document.getElementById('entryForm').addEventListener('submit', async function (e) {
     e.preventDefault();
-    
-    const formAlert = document.getElementById('formAlert');
+
     const saveBtn = document.getElementById('saveBtn');
     const spinner = document.getElementById('loadingSpinner');
-    
+    const formAlert = document.getElementById('formAlert');
+
+    // Collect form data
     const formData = {
-        id: null,
-        type: document.getElementById('entryTitle').value.trim(),
-        category: document.getElementById('category').value,
-        description: document.getElementById('description').value.trim(),
-        sanctions: null,
-        page: document.getElementById('referencePage').value.trim() || null
+        ID: Date.now().toString(), // or generate your own unique ID
+        Type: document.getElementById('entryTitle').value.trim(),
+        Category: document.getElementById('category').value,
+        Description: document.getElementById('description').value.trim(),
+        Sanctions: null, // add this if you have a field later
+        Page: document.getElementById('referencePage').value.trim() || null
     };
-    
-    if (!formData.type || !formData.category || !formData.description) {
+
+    // Validate
+    if (!formData.Type || !formData.Category || !formData.Description) {
         showAlert('Please fill in all required fields.', 'error');
         return;
     }
-    
+
     saveBtn.disabled = true;
     spinner.style.display = 'block';
-    
-    setTimeout(() => {
-        const entry = {
+    formAlert.style.display = 'none';
+
+    try {
+        // Send data to backend
+        const response = await fetch('/addDatabaseBot', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || 'Failed to add entry');
+        }
+
+        // Add to local recentEntries
+        recentEntries.unshift({
             ...formData,
-            id: Date.now(),
             timestamp: new Date().toISOString()
-        };
-        
-        recentEntries.unshift(entry);
+        });
         if (recentEntries.length > 5) {
             recentEntries = recentEntries.slice(0, 5);
         }
-        
+
         updateRecentEntries();
         clearForm();
         showAlert('Entry saved successfully!', 'success');
-        
+
+    } catch (err) {
+        console.error('Save error:', err);
+        showAlert(`Error: ${err.message}`, 'error');
+    } finally {
         saveBtn.disabled = false;
         spinner.style.display = 'none';
-    }, 1000);
+    }
 });
+
 
 // Clear form
 function clearForm() {
@@ -166,3 +188,5 @@ document.getElementById('password').addEventListener('keypress', function(e) {
         document.getElementById('loginForm').dispatchEvent(new Event('submit'));
     }
 });
+
+/** -FOR ADDING INFORMATION SECTION- */
