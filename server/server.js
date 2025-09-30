@@ -36,17 +36,40 @@ app.get('/', (req, res) => {
 // --- API endpoint ---
 app.post("/addDatabaseBot", async (req, res) => {
     const { ID, Type, Category, Description, Sanctions, Page } = req.body;
-
+    
     try {
+        // Check for duplicate description && category (100%)
+        const duplicateCheck = await pool.query(
+            'SELECT "Type", "Category" FROM "databaseBot" WHERE "Description" = $1 AND "Category" = $2 LIMIT 1',
+            [Description, Category]
+        );
+        
+        if (duplicateCheck.rows.length > 0) {
+            const existing = duplicateCheck.rows[0];
+            return res.status(409).json({ 
+                error: 'Duplicate entry detected',
+                message: `An entry with this exact description already exists under "${existing.Type}" in the ${existing.Category} category.`,
+                isDuplicate: true
+            });
+        }
+
+        // If no duplicate, proceed with insertion
         await pool.query(
             'SELECT public.add_databasebot_row($1, $2, $3, $4, $5, $6)',
             [ID, Type, Category, Description, Sanctions, Page]
         );
-
+        
         res.json({ message: "Row added successfully!" });
+        
     } catch (err) {
         console.error('Database error:', err);
-        res.status(500).json({ error: 'Database error' });
+        
+        // Check if it's a network/connection error
+        if (err.code === 'ENOTFOUND' || err.code === 'ETIMEDOUT' || err.code === 'ECONNREFUSED') {
+            res.status(503).json({ error: 'Cannot connect to database. Please check your internet connection.' });
+        } else {
+            res.status(500).json({ error: 'Database error occurred.' });
+        }
     }
 });
 

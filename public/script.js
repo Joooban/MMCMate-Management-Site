@@ -7,6 +7,24 @@ const DEMO_CREDENTIALS = {
 let recentEntries = [];
 let currentUser = null;
 
+// Network Error Handling
+async function fetchWithTimeout(url, options, timeout = 10000) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    
+    try {
+        const response = await fetch(url, {
+            ...options,
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        return response;
+    } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
+    }
+}
+
 // Login functionality
 document.getElementById('loginForm').addEventListener('submit', function(e) {
     console.log("Login form submitted");
@@ -90,9 +108,16 @@ document.getElementById('confirmSubmitBtn').addEventListener('click', async func
 
         if (!response.ok) {
             const result = await response.json();
+            
+            // If it's a duplicate, throw err
+            if (result.isDuplicate) {
+                throw new Error(result.message);
+            }
+            
             throw new Error(result.error || 'Failed to add entry');
         }
 
+        // Sumakses
         recentEntries.unshift({
             ...formData,
             timestamp: new Date().toISOString()
@@ -106,7 +131,26 @@ document.getElementById('confirmSubmitBtn').addEventListener('click', async func
 
     } catch (err) {
         console.error('Save error:', err);
-        showAlert(`Error: ${err.message}`, 'error');
+        
+        // Check if duplicate error
+        if (err.message.includes('Duplicate entry detected')) {
+            document.getElementById('duplicateModalMessage').textContent = err.message.replace('Duplicate entry detected', '').trim();
+            const duplicateModal = new bootstrap.Modal(document.getElementById('duplicateModal'));
+            duplicateModal.show();
+        }
+        // Check if network error
+        else if (err.message === 'Failed to fetch') {
+            document.getElementById('errorModalMessage').textContent = 'Cannot connect to server. Please check your internet connection and try again.';
+            const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+            errorModal.show();
+        }
+        // Other errors
+        else {
+            document.getElementById('errorModalMessage').textContent = err.message || 'An unexpected error occurred.';
+            const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+            errorModal.show();
+        }
+        
     } finally {
         saveBtn.disabled = false;
         spinner.style.display = 'none';
