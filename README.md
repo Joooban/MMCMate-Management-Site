@@ -47,7 +47,7 @@ Then open `http://localhost:PORT` in your browser.
 ## 🛠 Usage
 1. Sign in
 2. Navigate to the dashboard
-3. Add information
+3. Add information to the handbook
 
 ## 👩‍💻 Authors
 - **Marga Pilapil** – [@vennDiagramm](https://github.com/vennDiagramm)  
