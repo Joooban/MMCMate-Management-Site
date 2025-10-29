@@ -1,10 +1,9 @@
-# MMC Mate Management Site
-A web application for managing mates / members / related data.
+# MMCMate Management Site
+A a simple web application for adding content in the MMCM Handbook.
 
 ## 🚀 Built With
 - HTML, CSS, JavaScript
 - Node.js (server folder)
-- (Add frameworks or databases if used)
 
 ## 🧩 Project Structure
 ```
@@ -42,29 +41,21 @@ npm start
 Then open `http://localhost:PORT` in your browser.
 
 ## 🎯 Features
-- User/member management (CRUD)
+- Add content to MMCM Handbook
 - Responsive UI
-- (Add more: authentication, roles, reports, etc)
 
 ## 🛠 Usage
-1. Sign in (if applicable)
+1. Sign in
 2. Navigate to the dashboard
-3. Use side menu to manage mates/members
-4. (Add workflow notes if needed)
+3. Add information
 
-## ✅ Why This Project?
-- Streamlines mate/member management
-- Clean separation between front-end and back-end
-- Easy to maintain and expand
-- Great for learning full-stack JavaScript
+## 👩‍💻 Authors
+- **Marga Pilapil** – [@vennDiagramm](https://github.com/vennDiagramm)  
+- **Jhouvann Morden** – [@Joooban](https://github.com/Joooban)  
+- **Mel Macabenta** – [@Lumeru](https://github.com/Lumeru)
 
-## 📝 Future Improvements
-- Add authentication / user roles
-- Implement search & filtering
-- Integrate with a production database
-- Add unit/integration tests
-- Deploy to cloud (Heroku, AWS, etc)
-- Improve UI/UX (dark mode, animations)
+---
 
-## 📄 License
-This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
+# 📬 Contact & Acknowledgments
+
+This was solely developed by students of **Mapúa Malayan Colleges Mindanao (MMCM)** for academic purposes under **CS140-1: Software Engineering 1**.  
