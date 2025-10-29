@@ -29,8 +29,8 @@ npm install
 ```
 
 ### 3. Setup / Configuration
-(Explain any env variables, DB connections, etc)
-- Create a `.env` file if needed (e.g., DB_URI, PORT)
+- Create a `.env` file if needed
+  - Store `DB_URI, PORT` 
 - Adjust config in `server/config` (if applicable)
 
 ### 4. Run the app
